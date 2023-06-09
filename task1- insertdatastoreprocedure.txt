@@ -1,0 +1,43 @@
+complete procedure for insert data in companies and user table at same time inside procedure  with exit handler 
+
+
+DELIMITER //
+CREATE PROCEDURE Inserthandlerr(in p_cin_number varchar(255),in p_company_logo varchar(255),in p_company_name varchar(255), in p_gst_number varchar(255),
+ in p_iec_code varchar(255), in p_pan_number varchar(255),in p_tan_number varchar(255), p_active_inactive bit(1),in a_active_inactive bit(1), in p_email varchar(255),
+ in p_first_name varchar(255), in p_last_name varchar(255),in p_password varchar(255), 
+ in p_user_locked int,
+ in p_user_type varchar(255))
+BEGIN
+    DECLARE company_id bigint;
+    DECLARE user_id bigint;
+
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'An error occurred during insertion.' AS Error;
+    END;
+
+START TRANSACTION; -- Start a transaction
+    
+-- Insert into companies 
+    INSERT INTO companies (cin_number ,company_logo,company_name , gst_number ,
+ iec_code , pan_number ,tan_number,active_inactive )
+    VALUES ( p_cin_number ,p_company_logo,p_company_name , p_gst_number ,
+ p_iec_code , p_pan_number ,p_tan_number,p_active_inactive);
+
+-- Get the auto-generated companie_id from the companie table
+    SET company_id = LAST_INSERT_ID();
+    
+-- Insert into user table
+    INSERT INTO user (active_inactive, email , first_name , last_name ,password , user_locked ,
+  user_type )
+    VALUES ( a_active_inactive, p_email , p_first_name , p_last_name ,p_password , p_user_locked ,
+  p_user_type);
+    
+   
+ COMMIT; -- Commit the transaction
+
+END //
+DELIMITER ;
+call Inserthandlerr('L17110MH1973PLC019786', 'Business logo','itcompany','abcdef','bisky','klyp','xyz',1,0,'abc@gmail.com','sky','decor','password','1','default');  
